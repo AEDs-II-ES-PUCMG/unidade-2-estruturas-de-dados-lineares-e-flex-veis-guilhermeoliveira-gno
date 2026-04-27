@@ -19,8 +19,11 @@ public class App {
     /** Quantidade de produtos cadastrados atualmente no vetor */
     static int quantosProdutos = 0;
 
-    /** Pilha de pedidos */
-    static Pilha<Pedido> pilhaPedidos = new Pilha<>();
+    /** Fila de pedidos */
+    static Fila<Pedido> filaPedidos = new Fila<>();
+    
+    /** Pilha de produtos mais recentemente pedidos */
+    static Pilha<Produto> pilhaProdutosRecentes = new Pilha<>();
         
     static void limparTela() {
         System.out.print("\033[H\033[2J");
@@ -209,15 +212,52 @@ public class App {
      * @param pedido O pedido que deve ser finalizado.
      */
     public static void finalizarPedido(Pedido pedido) {
-    	
-    	// TODO
+    	if (pedido != null) {
+            filaPedidos.enfileirar(pedido);
+            ItemDePedido[] itens = pedido.getItensDoPedido();
+            for (ItemDePedido item : itens) {
+                if (item != null) {
+                    pilhaProdutosRecentes.empilhar(item.getProduto());
+                }
+            }
+            System.out.println("Pedido finalizado e armazenado.");
+        } else {
+            System.out.println("Nenhum pedido para finalizar.");
+        }
     }
     
     public static void listarProdutosPedidosRecentes() {
-    	
-    	// TODO
+    	cabecalho();
+        System.out.println("\nPRODUTOS MAIS RECENTES (PILHA):");
+        if (pilhaProdutosRecentes.vazia()) {
+            System.out.println("Nenhum produto registrado recentemente.");
+            return;
+        }
+
+        int k = lerOpcao("Quantos produtos recentes deseja visualizar?", Integer.class);
+        try {
+            Pilha<Produto> sub = pilhaProdutosRecentes.subPilha(k);
+            while (!sub.vazia()) {
+                System.out.println(sub.desempilhar().descricao);
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Erro: " + e.getMessage());
+        }
     }
     
+    public static void salvarPedidos() {
+        try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter("pedidos_realizados.txt"))) {
+            while (!filaPedidos.vazia()) {
+                Pedido p = filaPedidos.desenfileirar();
+                writer.println(p.toString());
+                writer.println("----------------------------------");
+            }
+            System.out.println("Pedidos salvos em pedidos_realizados.txt");
+        } catch (IOException e) {
+            System.out.println("Erro ao salvar pedidos: " + e.getMessage());
+        }
+    }
+
 	public static void main(String[] args) {
 		
 		teclado = new Scanner(System.in, Charset.forName("UTF-8"));
@@ -236,8 +276,12 @@ public class App {
                 case 2 -> mostrarProduto(localizarProduto());
                 case 3 -> mostrarProduto(localizarProdutoDescricao());
                 case 4 -> pedido = iniciarPedido();
-                case 5 -> finalizarPedido(pedido);
+                case 5 -> {
+                    finalizarPedido(pedido);
+                    pedido = null;
+                }
                 case 6 -> listarProdutosPedidosRecentes();
+                case 0 -> salvarPedidos();
             }
             pausa();
         }while(opcao != 0);       
