@@ -52,31 +52,31 @@ public class Pilha<E> {
 	 * @return uma nova instância de Pilha<E> contendo os numItens primeiros elementos.
 	 * @throws IllegalArgumentException se a pilha não contém numItens elementos.
 	 */
-	@SuppressWarnings("unchecked")
 	public Pilha<E> subPilha(int numItens) {
 		
-        if (numItens < 0) {
-            throw new IllegalArgumentException("O número de itens não pode ser negativo.");
-        }
+		// TODO
+		return null;
+	}
 
-		Pilha<E> novaPilha = new Pilha<>();
-        if (numItens == 0) return novaPilha;
+	void imprimir() {
+		if(vazia()){
+			throw new NoSuchElementException("A pilha está vazia!");
+		}
+		Celula<E> aux = topo;
+		while(aux!=fundo){
+			System.out.println(aux.getItem());
+			aux = aux.getProximo();
+		}
 
-        E[] buffer = (E[]) new Object[numItens];
-        Celula<E> atual = topo;
-        
-        for (int i = 0; i < numItens; i++) {
-            if (atual == fundo) {
-                throw new IllegalArgumentException("A pilha não contém " + numItens + " elementos.");
-            }
-            buffer[i] = atual.getItem();
-            atual = atual.getProximo();
-        }
-        
-        for (int i = numItens - 1; i >= 0; i--) {
-            novaPilha.empilhar(buffer[i]);
-        }
-        
-        return novaPilha;
+	}
+	void imprime_certo(){
+		Celula<E> atual = topo;
+		certo(atual);
+	}
+	void certo(Celula<E> atual){
+		if(atual!=fundo){
+			certo(atual.getProximo());
+			System.out.println(atual.getItem());
+		}
 	}
 }
